@@ -221,6 +221,23 @@
 			<img width=555 height=471 src="images/my_robot.png">
 		</div>
 
+		<h3>Extra credit</h3>
+		The extra credit feature implemented was implementing rotation of the
+		viewport about its center using the keys "," and "." to rotate counterclockwise and clockwise, respectively.
+
+		<figure>
+			<img src="images/task4_rotation.png">
+		</figure>
+
+		This was applying the following transformations in sequence
+		to the <code>screen_to_ndc</code> transformation matrix
+		<ol>
+			<li>Translation by <code>-width / 2, -height / 2</code></li>
+			<li>Rotation by \( \pm \) 0.5 degrees</li>
+			<li>Translation by <code>width / 2, height / 2</code></li>
+		</ol>
+		
+
 		<h2>Task 4: Barycentric coordinates</h2>
 		(2D) Barycentric coordinates are a coordinate system relative to a specific triangle.
 		For a triangle, three numbers make up the coordinates, each corresponding to one of the vertices.
@@ -231,9 +248,9 @@
 		of the triangle formed by the point and the two other vertices
 		that do not correspond to the coordinate.
 
-		For a point with coordinates \( (x, y) \) inside a triangle ABC,
+		<p>For a point with coordinates \( (x, y) \) inside a triangle ABC,
 		where the triangle's vertices are \( (x_A, y_A), (x_B, y_B), , (x_C, y_C) \),
-		the barycentric coordinates \( (\alpha, \beta, \gamma) \) are calculated as follows:
+		the barycentric coordinates \( (\alpha, \beta, \gamma) \) are calculated as follows:</p>
 
 		\[
 			\alpha = \frac{L_{BC} (x, y)}{L_{BC} (x_A, y_A)} \\
@@ -245,15 +262,15 @@
 		in section Task 1.
 
 
-		For a visual understanding, consider the below triangle. The vertices are
+		<p>For a visual understanding, consider the below triangle. The vertices are
 		assigned red, blue, and green, respectively, and barycentric coordinates
 		interpolate between the three colors. At the red vertex, for example,
 		the coordinate corresponding to the vertex is 1, while the other two coordinates
-		are zero, so the resulting pixel color is red. 
+		are zero, so the resulting pixel color is red. </p>
 
-		Between the red and blue vertices, the barycentric coordinates are 0.5
+		<p>Between the red and blue vertices, the barycentric coordinates are 0.5
 		for the red and blue vertices, and 0 for the green. Therefore, the resulting
-		color is purple, an even blend between red and blue.
+		color is purple, an even blend between red and blue.</p>
 
 		<figure>
 			<img src="images/color_tri.png">
