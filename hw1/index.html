@@ -24,80 +24,411 @@
 				font-family: 'Inter', sans-serif;
 			}
 		</style>
+		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
 		<div class="container">
 		<h1>CS184/284A Spring 2025 Homework 1 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+		<div style="text-align: center;">Names: Ian Wong, Andy Wang</div>
 
 		<br>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-pants/hw1/index.html">https://cal-cs184-student.github.io/hw-webpages-pants/hw1/index.html</a>
 		
 		<br>
 
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to GitHub repository: <a href="https://github.com/cal-cs184-student/sp25-hw1-team-miya">https://github.com/cal-cs184-student/sp25-hw1-team-miya</a>
 
-		<figure>
-			<img src="lion.jpg" alt="Lion" style="width:50%"/>
+		<!-- <figure>
+			<img src="images/image1.png" alt="Lion" style="width:50%"/>
 			<figcaption>You can add images with captions!</figcaption>
-		</figure>
+		</figure> -->
 
 		<!--
 		We've already added one heading per task, to make your write-up as navigable when grading. Please fit your write-up within these sections!
 		-->
 
 		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+		In this homework, we implemented several parts of the rasterization pipeline
+		to create a functioning SVG rendering: rasterizization, transforms, and texture mapping.
+
+		We explored various antialiasing techniques including supersampling,
+		level sampling (mipmaps), and pixel sampling with different tradeoffs between
+		compute, memory, and antialiasing power.
+
+		<!-- Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework. -->
 
 		<h2>Task 1: Drawing Single-Color Triangles</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
-		<div style="display: flex; flex-direction: column; align-items: center;">
-			<table style="width: 100%; text-align: center; border-collapse: collapse;">
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			</table>
-		</div>
+		<h3>Task Overview</h3>
+		
+		To rasterize a triangle, we have to determine which pixels on the screen to color. We do this by testing the center of each pixel to see if it lies inside the triangle. This process involves:
+		<ol>
+			<li>Finding the smallest rectangle that completely contains the triangle, or the bounding box</li>
+			<li>Checking if the center of each pixel within the bounding box lies inside the triangle</li>
+			<li>Coloring the pixels that pass the point-in-triangle test</li>
+		</ol>
+
+		<h3>Step-by-Step</h3>
+
+		<ol>
+			<li><strong>Calculate the Bounding Box:</strong> The bounding box is the smallest rectangle that encloses the triangle. It is defined by the minimum and maximum x and y coordinates of the triangle's vertices. This ensures that we only iterate over pixels that could possibly be inside the triangle.</li>
+			<li><strong>Iterate over the Bounding Box:</strong> For each pixel in the bounding box</li>
+				<ol>
+					<li>Calculate the center of the pixel: <code>(px, py) = (x + 0.5, y + 0.5)</code></li>
+					<li>Perform the point-in-triangle test to determine if <code>(px, py)</code> lies inside the triangle</li>
+				</ol>
+			<li><strong>Point-in-Triangle Test:</strong> The point-in-triangle test uses the three-line test. For each edge of the triangle:</li>
+				<ol>
+					<li>Compute the cross product of the edge vector and the vector from the edge's starting vertex to the sample point</li>
+					<li>If the point lies on the same side of all three edges, it is inside the triangle</li>
+					<li>Compute the winding order of the triangle by checking the cross product of two edges and adjust the point-in-triangle test if necessary</li>
+				</ol>
+			<li><strong>Fill the Pixel:</strong> If the sample point <code>(px, py)</code> passes the point-in-triangle test, call <code>(x, y, color)</code> to color the pixel.</li>
+		</ol>
+
+		<h3>Algorithm Efficiency</h3>
+		
+		The algorithm is no worse than one that checks each sample within the bounding box because:
+		<ul> 
+			<li><strong>Bounding Box Optimization:</strong> By limiting the iteration to the bounding box, the algorithm avoids checking pixels that are guaranteed to be outside the triangle, which reduces the number of pixel checks significantly</li>
+			<li><strong>Point-in-Triangle Test:</strong> The three-line test is efficient and involves only a few arithmetic operations per pixel</li>
+		</ul>
+
+		<figure>
+			<img src="images/task1.png" alt="Lion" style="width:50%"/>
+			<figcaption>Render of basic/test4.svg</figcaption>
+		</figure>
+
+		<h3>Optimizations</h3>
+		As an optimization, we also implemented rasterization using an
+		incremental version of the line test. Because the samples are evenly spaced
+		and computations for the line test are linear, the change in the result
+		for the line test is constant per change in sample.
+
+		Here is a derivation of this fact.
+
+		For the line test at point \( (x, y) \) and line between \( (u_x, u_y) \)
+		and \( (v_x, v_y) \), the formula for line test is
+		\[
+			\begin{align*}
+				L(x, y) &= -(x - u_x)(v_y - u_y) + (y - u_y)(v_x - u_x) \\
+				&= -(x - u_x) Y_{uv} + (y - u_y) X_{uv}
+			\end{align*}
+		\]
+
+		Where \( Y_{uv} = v_y - u_y \) and \( X_{uv} = v_x - u_x \).
+
+		L is affine in \( x \) and in \( y \), so we can see
+		that for a change by one unit in the x or y direction:
+		\[
+			\begin{align*}
+				L(x + 1, y) - L(x, y) &= Y_{uv} \\
+				L(x, y + 1) - L(x, y) &= X_{uv} \\
+			\end{align*}
+		\]
+
+		Importantly, this change is constant, so we can precompute it once and
+		simply add the difference as the x and y coordinate changes.
+		The line test is more expensive than this simple addition, requiring
+		several subtractions and multiplications.
+
+		The performance impact was compared to our initial implementation by
+		using the average time to call <code>redraw()</code> averaged over 10,000 calls.
+		The initial implementation averaged about 3.3 ms per call. The optimized
+		implementation averaged about 2.5 ms per call.
 		
 		<h2>Task 2: Antialiasing by Supersampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
+	Supersampling reduces aliasing (jagged edges) in rasterized images by sampling multiple points within each pixel and averaging their colors.
+
+    <h3>Data Structures</h3>
+    <ul>
+        <li><strong>sample_buffer</strong>: Stores color values of all supersamples for each pixel. Size: <code>width * height * sample_rate</code>.</li>
+        <li><strong>rgb_framebuffer_target</strong>: Stores final 8-bit RGB values for each pixel. Size: <code>3 * width * height</code>.</li>
+    </ul>
+
+    <h3>Supersampling Algorithm</h3>
+	<ol>
+    <li>Rasterize into <code>sample_buffer</code></li>
+		<ol>
+			<li>Divide each pixel into a grid of <code>sample_side x sample_side</code> subsamples, where <code>sample_side = sqrt(sample_rate)</code>.</li>
+			<li>For each subsample <code>(sx, sy)</code>:
+				<ol>
+					<li>Calculate the sample point <code>(px, py)</code> within the pixel:
+						<pre><code>float px = x + (sx + 0.5f) * sample_step;
+float py = y + (sy + 0.5f) * sample_step;</code></pre>
+					</li>
+					<li>Perform the point-in-triangle test to determine if the sample lies inside the triangle.</li>
+					<li>If the sample is inside the triangle, store its color in the <code>sample_buffer</code> at the corresponding index:
+						<pre><code>int sample_index = (y * width + x) * sample_rate + (sy * sample_side + sx);
+sample_buffer[sample_index] = color;</code></pre>
+					</li>
+				</ol>
+			</li>
+		</ol>
+
+        <li> Resolve <code>sample_buffer</code> into <code>rgb_framebuffer_target</code></li>
+                <ol>
+                    <li>Accumulate the colors of all subsamples for each pixel:
+                        <pre><code>Color accumulated_color = Color::Black;
+for (int sx = 0; sx < sample_side; ++sx) {
+    for (int sy = 0; sy < sample_side; ++sy) {
+        int sample_index = (y * width + x) * sample_rate + (sy * sample_side + sx);
+        accumulated_color += sample_buffer[sample_index];
+    }
+}</code></pre>
+                    </li>
+                    <li>Average the accumulated color by dividing by <code>sample_rate</code>:
+                        <pre><code>accumulated_color.r /= sample_rate;
+accumulated_color.g /= sample_rate;
+accumulated_color.b /= sample_rate;</code></pre>
+                    </li>
+                    <li>Convert the averaged color to 8-bit RGB and store it in the <code>rgb_framebuffer_target</code>:
+                        <pre><code>for (int k = 0; k < 3; ++k) {
+    rgb_framebuffer_target[3 * (y * width + x) + k] = (&accumulated_color.r)[k] * 255;
+}</code></pre>
+                    </li>
+                </ol>
+            </li>
+	</ol>
+
+    <h3>Modifications to Rasterization Pipeline</h3>
+    <ol>
+        <li>Rasterize into <code>sample_buffer</code> (higher resolution)</li>
+        <li>Resolve <code>sample_buffer</code> into <code>rgb_framebuffer_target</code> by averaging subsamples</li>
+        <li>Display the final framebuffer</li>
+    </ol>
+
+
+	<div style="display: flex; flex-direction: column; align-items: center;">
+		<table style="width: 100%; text-align: center; border-collapse: collapse;">
+		  <tr>
+			<td style="text-align: center;">
+			  <img src="images/task2_1.png" width="400px"/>
+			  <figcaption>Sample Rate 1</figcaption>
+			</td>
+			<td style="text-align: center;">
+			  <img src="images/task2_4.png" width="400px"/>
+			  <figcaption>Sample Rate 4</figcaption>
+			</td>
+		  </tr>
+		  <tr>
+			<td style="text-align: center;">
+			  <img src="images/task2_16.png" width="400px"/>
+			  <figcaption>Sample Rate 16</figcaption>
+			</td>
+		  </tr>
+		</table>
+	</div>
+    
+
+    <h3>Conclusion</h3>
+    <p>Supersampling improves visual quality by reducing aliasing. Key modifications include rasterizing into a higher-resolution <code>sample_buffer</code> and resolving it into the final framebuffer by averaging subsamples.</p>
+		
 		<h2>Task 3: Transforms</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		Below is an image of a robot running.
+		The image is a rendering of a SVG image that the three implemented transforms.
+
+		<div>
+			<img width=555 height=471 src="images/my_robot.png">
+		</div>
 
 		<h2>Task 4: Barycentric coordinates</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		(2D) Barycentric coordinates are a coordinate system relative to a specific triangle.
+		For a triangle, three numbers make up the coordinates, each corresponding to one of the vertices.
+		For points inside the triangle, all barycentric coordinates are between 0 and 1, and sum to 1.
+		One geometric interpretation of barycentric coordinates is that each coordinate
+		is the proportional distance from the edge opposite the correponding vertex to the vertex.
+		Another interpretation is that each coordinate is the proportional area
+		of the triangle formed by the point and the two other vertices
+		that do not correspond to the coordinate.
+
+		For a point with coordinates \( (x, y) \) inside a triangle ABC,
+		where the triangle's vertices are \( (x_A, y_A), (x_B, y_B), , (x_C, y_C) \),
+		the barycentric coordinates \( (\alpha, \beta, \gamma) \) are calculated as follows:
+
+		\[
+			\alpha = \frac{L_{BC} (x, y)}{L_{BC} (x_A, y_A)} \\
+			\beta = \frac{L_{AC} (x, y)}{L_{AC} (x_B, y_B)} \\
+			\gamma = \frac{L_{AB} (x, y)}{L_{AB} (x_C, y_C)}
+		\]
+
+		where \( L_{AB} \) is the line test equation for the line AB as described
+		in section Task 1.
+
+
+		For a visual understanding, consider the below triangle. The vertices are
+		assigned red, blue, and green, respectively, and barycentric coordinates
+		interpolate between the three colors. At the red vertex, for example,
+		the coordinate corresponding to the vertex is 1, while the other two coordinates
+		are zero, so the resulting pixel color is red. 
+
+		Between the red and blue vertices, the barycentric coordinates are 0.5
+		for the red and blue vertices, and 0 for the green. Therefore, the resulting
+		color is purple, an even blend between red and blue.
+
+		<figure>
+			<img src="images/color_tri.png">
+			<caption>Triangle with red, blue, and green vertices, interpolated using barycentric coordinates</caption>
+		</figure>
+
+		Below is another example of the gradients that can be created using Barycentric coordinates (<code>svg/basic/test7.svg</code>)
+
+		<img src="images/test7.png">
 
 		<h2>Task 5: "Pixel sampling" for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		Pixel sampling is a method to draw triangles with textures by using
+		pixel(s) in the texture that correspond to a sample in the triangle to
+		determine the color of the triangle sample.
+
+		My implementation is as follows: For each triangle sample, calculate the
+		corresponding UV coordinate by taking a interpolation of the three vertices'
+		UV coordinates using the barycentric coordinates of the sample.
+		Barycentric coordinates as described in the section for Task 4.
+		Mathematically, if the barycentric coordinates of the sample are
+		\( (\alpha, \beta, \gamma) \) and vertices of the triangles have UV coordinates of
+		\( (u_1, v_1) \), \( (u_2, v_2) \), \( (u_3, v_3) \), then then resulting
+		UV coordinates are \( (\alpha u_1 + \beta u_2 + \gamma u_3, \alpha v_1 + \beta v_2 + \gamma v_3) \)
+
+		The UV coordinate is scaled by the texture's width and height in the corresponding coordinate
+		and is then used to sample from the texture.
+
+		Two different methods of samplingn are implemented:
+		<ol>
+			<li>Nearest neighbor: Sample from the texture pixel closest to the scaled UV coordinate</li>
+			<li>Bilinear: Sample from the four nearest texture pixels and linearly interpolate between the four</li>
+		</ol>
+
+		Below are four images comparing nearest neighbor and bilinear.
+		Notice that in the nearest neighbor with 1 sample per pixel image,
+		the lines on the map are broken and very jagged.
+
+		Bilinear with 1 sample per pixel clearly has more solid lines and reduced jaggedness. 
+
+		<figure>
+			<img src="images/Task 5 nearest 1 spp.png">
+			<figcaption>Nearest neighbor, 1 sample per pixel</figcaption>
+		</figure>
+
+		<figure>
+			<img src="images/Task 5 bilinear 1 spp.png">
+			<figcaption>Bilinear, 1 sample per pixel</figcaption>
+		</figure>
+
+		<figure>
+			<figcaption>Nearest neighbor, 16 sample per pixel</figcaption>
+			<img src="images/Task 5 nearest 16 spp.png">
+		</figure>
+
+		<figure>
+			<img src="images/Task 5 bilinear 16 spp.png">
+			<figcaption>Bilinear, 16 sample per pixel</figcaption>
+		</figure>
+
+		These images show that bilinear has the most effect compared to nearest neighbor
+		at low samples per pixel where there is the most aliasing.
+		Higher supersampling rates already perform significant antialiasing,
+		so bilinear cannot perform additional smoothing.
 
 		<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		Level sampling is technique to reduce aliasing in texture mapping
+		by sampling from pre-downsampled textures.
+		The different texture resolutions are called levels or mipmaps.
+		The downsampled textures are effectively low-pass filtered, so
+		higher frequencies are filtered out. At each sample, a texture is chosen
+		with a frequencies that approximately matches the screen sampling rate,
+		therefore reducing aliasing.
 
-		<h2>(Optional) Task 7: Extra Credit - Draw Something Creative!</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+	 	In my implementation, the screen sampling rate is estimated by calculating
+		the change in the uv coordinates when changing the x and y screen coordinates each
+		by 1 separately.
 
-		<h2>Additional Notes (please remove)</h2>
+		For the function \( f(x, y) \) mapping x, y coordinates to u, v coordinates
+
+		\[
+			\begin{bmatrix} \frac{du}{dx} \\ \frac{dv}{dx} \end{bmatrix}
+			\approx f(x, y) - f(x + 1, y) \\
+			\begin{bmatrix} \frac{du}{dy} \\ \frac{dv}{dy} \end{bmatrix}
+			\approx f(x, y) - f(x, y + 1)
+		\]
+
+		
+		The maximum magnitude of the change in uv coordinates from either
+		the change in x or y is used to calculate the texture level to sample from.
+
+		\[
+			D = \max \left(
+				\left \Vert  \begin{bmatrix} \frac{du}{dx} \\ \frac{dv}{dx} \end{bmatrix} \right \Vert,
+				\left \Vert  \begin{bmatrix} \frac{du}{dx} \\ \frac{dv}{dx} \end{bmatrix} \right \Vert
+			\right) \\
+			\text{level} = \log_2 D
+		\]
+
+		Lower levels correspond to higher resolutions because
+		lower levels result from lower ask screen sampling rates, which require
+		less filtering. For example, level 0 is the full resolution texture
+		while level 2 is a 4x4 downsample.
+
+		Just as there are different pixel sampling methods, there are different
+		level sampling methods. Two methods are implemented: nearest and linear.
+		Nearest samples from mipmap with the closest level, while linear takes a
+		linear interpolation of samples for the two nearest levels.
+
+		Pixel sampling, level sampling, and the number of samples per pixel
+		can all be combined and used independently about come with tradeoffs
+		between speed, memory usage, and antialiasing power.
+
+		Pixel sampling is the fastest and has the least memory usage because
+		it simply samples from the same texture an additional number of times.
+		It also has the least antialiasing power because it only samples from
+		a small number of pixels from the immediate surroundings.
+
+		Below a comparision for the different combinations of techniques applied to an image
+
+		<table class="default-table">
+			<tr>
+				<th></th>
+				<th></th>
+				<th colspan="3" class="horizontal-header">Level sampling</th>
+			</tr>
+			<tr>
+				<th></th>
+				<th></th>
+				<th style="border: 1px solid black">None (Level 0)</th>
+				<th style="border: 1px solid black">Nearest</th>
+			</tr>
+			<tr>
+				<th rowspan="3" class="vertical-header">Pixel <br> Sampling</th>
+			</tr>
+			<tr>
+				<th style="border: 1px solid black">Nearest <br> neighbor</th>
+				<td><img src="images/task6_l_zero_p_nearest.png" width="320px" height="240px"></td>
+				<td><img src="images/task6_l_nearest_p_nearest.png" width="320px" height="240px"></td>
+			</tr>
+			<tr>
+				<th style="border: 1px solid black">Linear</th>
+				<td><img src="images/task6_l_zero_p_linear.png" width="320px" height="240px"></td>
+				<td><img src="images/task6_l_nearest_p_linear.png" width="320px" height="240px"></td>
+			</tr>
+		</table>
+
+		Level sampling is slower and requires more memory because it
+		computes the change in uv coordinates and stores mipmap textures
+		on top of the original texture.
+		This achieves higher antialiasing power because it the downsampled
+		textures can filter high frequencies better and capture more of the
+		original texture than a few pixel samples can.
+
+		Increasing the umber of samples per pixel is the slowest and most memory
+		intensive as it effectively renders at a higher resolution,
+		requiring not just additional texture lookups,
+		but also running all steps of the rasterization pipeline for the additional pixels.
+
+		<!-- <h2>(Optional) Task 7: Extra Credit - Draw Something Creative!</h2>
+		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. -->
+
+		<!-- <h2>Additional Notes (please remove)</h2>
 		<ul>
 			<li>You can also add code if you'd like as so: <code>code code code</code></li>
 			<li>If you'd like to add math equations, 
@@ -106,7 +437,7 @@
 					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
 				</ul>
 			</li>
-		</ul>
+		</ul> -->
 		</div>
 	</body>
 </html>
