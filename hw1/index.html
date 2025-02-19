@@ -156,13 +156,9 @@
 			<li>For each subsample <code>(sx, sy)</code>:
 				<ol>
 					<li>Calculate the sample point <code>(px, py)</code> within the pixel:
-						<pre><code>float px = x + (sx + 0.5f) * sample_step;
-float py = y + (sy + 0.5f) * sample_step;</code></pre>
 					</li>
 					<li>Perform the point-in-triangle test to determine if the sample lies inside the triangle.</li>
 					<li>If the sample is inside the triangle, store its color in the <code>sample_buffer</code> at the corresponding index:
-						<pre><code>int sample_index = (y * width + x) * sample_rate + (sy * sample_side + sx);
-sample_buffer[sample_index] = color;</code></pre>
 					</li>
 				</ol>
 			</li>
@@ -171,23 +167,13 @@ sample_buffer[sample_index] = color;</code></pre>
         <li> Resolve <code>sample_buffer</code> into <code>rgb_framebuffer_target</code></li>
                 <ol>
                     <li>Accumulate the colors of all subsamples for each pixel:
-                        <pre><code>Color accumulated_color = Color::Black;
-for (int sx = 0; sx < sample_side; ++sx) {
-    for (int sy = 0; sy < sample_side; ++sy) {
-        int sample_index = (y * width + x) * sample_rate + (sy * sample_side + sx);
-        accumulated_color += sample_buffer[sample_index];
-    }
-}</code></pre>
+                        
                     </li>
                     <li>Average the accumulated color by dividing by <code>sample_rate</code>:
-                        <pre><code>accumulated_color.r /= sample_rate;
-accumulated_color.g /= sample_rate;
-accumulated_color.b /= sample_rate;</code></pre>
+                        
                     </li>
                     <li>Convert the averaged color to 8-bit RGB and store it in the <code>rgb_framebuffer_target</code>:
-                        <pre><code>for (int k = 0; k < 3; ++k) {
-    rgb_framebuffer_target[3 * (y * width + x) + k] = (&accumulated_color.r)[k] * 255;
-}</code></pre>
+                        
                     </li>
                 </ol>
             </li>
