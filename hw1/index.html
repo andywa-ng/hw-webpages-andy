@@ -100,7 +100,7 @@
 			<figcaption>Render of basic/test4.svg</figcaption>
 		</figure>
 
-		<h3>Optimizations</h3>
+		<h3>Optimizations (Extra Credit)</h3>
 		As an optimization, we also implemented rasterization using an
 		incremental version of the line test. Because the samples are evenly spaced
 		and computations for the line test are linear, the change in the result
@@ -137,6 +137,7 @@
 		using the average time to call <code>redraw()</code> averaged over 10,000 calls.
 		The initial implementation averaged about 3.3 ms per call. The optimized
 		implementation averaged about 2.5 ms per call.
+		Timing measurements were obtained using <code>std::chrono::high_resolution_clock</code>
 		
 		<h2>Task 2: Antialiasing by Supersampling</h2>
 
@@ -261,34 +262,37 @@
 
 		Below is another example of the gradients that can be created using Barycentric coordinates (<code>svg/basic/test7.svg</code>)
 
-		<img src="images/test7.png">
+		<figure>
+			<img src="images/test7.png">
+			<caption><code>svg/basic/test7.svg</code> rendered using default settings</caption>
+		</figure>
 
 		<h2>Task 5: "Pixel sampling" for texture mapping</h2>
-		Pixel sampling is a method to draw triangles with textures by using
+		<p>Pixel sampling is a method to draw triangles with textures by using
 		pixel(s) in the texture that correspond to a sample in the triangle to
-		determine the color of the triangle sample.
+		determine the color of the triangle sample.</p>
 
-		My implementation is as follows: For each triangle sample, calculate the
+		<p>My implementation is as follows: For each triangle sample, calculate the
 		corresponding UV coordinate by taking a interpolation of the three vertices'
 		UV coordinates using the barycentric coordinates of the sample.
 		Barycentric coordinates as described in the section for Task 4.
 		Mathematically, if the barycentric coordinates of the sample are
 		\( (\alpha, \beta, \gamma) \) and vertices of the triangles have UV coordinates of
 		\( (u_1, v_1) \), \( (u_2, v_2) \), \( (u_3, v_3) \), then then resulting
-		UV coordinates are \( (\alpha u_1 + \beta u_2 + \gamma u_3, \alpha v_1 + \beta v_2 + \gamma v_3) \)
+		UV coordinates are \( (\alpha u_1 + \beta u_2 + \gamma u_3, \alpha v_1 + \beta v_2 + \gamma v_3) \)</p>
 
-		The UV coordinate is scaled by the texture's width and height in the corresponding coordinate
-		and is then used to sample from the texture.
+		<p>The UV coordinate is scaled by the texture's width and height in the corresponding coordinate
+		and is then used to sample from the texture.</p>
 
-		Two different methods of samplingn are implemented:
+		<p>Two different methods of sampling are implemented:</p>
 		<ol>
 			<li>Nearest neighbor: Sample from the texture pixel closest to the scaled UV coordinate</li>
 			<li>Bilinear: Sample from the four nearest texture pixels and linearly interpolate between the four</li>
 		</ol>
 
-		Below are four images comparing nearest neighbor and bilinear.
+		<p>Below are four images comparing nearest neighbor and bilinear.
 		Notice that in the nearest neighbor with 1 sample per pixel image,
-		the lines on the map are broken and very jagged.
+		the lines on the map are broken and very jagged.</p>
 
 		Bilinear with 1 sample per pixel clearly has more solid lines and reduced jaggedness. 
 
@@ -303,8 +307,8 @@
 		</figure>
 
 		<figure>
-			<figcaption>Nearest neighbor, 16 sample per pixel</figcaption>
 			<img src="images/Task 5 nearest 16 spp.png">
+			<figcaption>Nearest neighbor, 16 sample per pixel</figcaption>
 		</figure>
 
 		<figure>
@@ -312,25 +316,31 @@
 			<figcaption>Bilinear, 16 sample per pixel</figcaption>
 		</figure>
 
-		These images show that bilinear has the most effect compared to nearest neighbor
+		<p>These images show that bilinear has the most effect compared to nearest neighbor
 		at low samples per pixel where there is the most aliasing.
 		Higher supersampling rates already perform significant antialiasing,
-		so bilinear cannot perform additional smoothing.
+		so bilinear cannot perform additional smoothing.</p>
+
+		<p>Another case where bilinear will have more effect compared to nearest neighbor
+		is in locations of a texture with high frequency signals such as sharp edges and lines.
+		One such example is dense grid lines.
+		Because these features have higher frequency, there is the most potential for aliasing
+		and therefore the most benefit from increasing the sampling rate of the texture.</p>
 
 		<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
-		Level sampling is technique to reduce aliasing in texture mapping
+		<p>Level sampling is technique to reduce aliasing in texture mapping
 		by sampling from pre-downsampled textures.
 		The different texture resolutions are called levels or mipmaps.
 		The downsampled textures are effectively low-pass filtered, so
 		higher frequencies are filtered out. At each sample, a texture is chosen
 		with a frequencies that approximately matches the screen sampling rate,
-		therefore reducing aliasing.
+		therefore reducing aliasing.</p>
 
-	 	In my implementation, the screen sampling rate is estimated by calculating
+	 	<p>In my implementation, the screen sampling rate is estimated by calculating
 		the change in the uv coordinates when changing the x and y screen coordinates each
-		by 1 separately.
+		by 1 separately.</p>
 
-		For the function \( f(x, y) \) mapping x, y coordinates to u, v coordinates
+		<p>For the function \( f(x, y) \) mapping x, y coordinates to u, v coordinates
 
 		\[
 			\begin{bmatrix} \frac{du}{dx} \\ \frac{dv}{dx} \end{bmatrix}
@@ -338,8 +348,9 @@
 			\begin{bmatrix} \frac{du}{dy} \\ \frac{dv}{dy} \end{bmatrix}
 			\approx f(x, y) - f(x, y + 1)
 		\]
+		</p>
 
-		
+		<p>
 		The maximum magnitude of the change in uv coordinates from either
 		the change in x or y is used to calculate the texture level to sample from.
 
@@ -350,27 +361,31 @@
 			\right) \\
 			\text{level} = \log_2 D
 		\]
+		</p>
 
-		Lower levels correspond to higher resolutions because
+		<p>Lower levels correspond to higher resolutions because
 		lower levels result from lower ask screen sampling rates, which require
 		less filtering. For example, level 0 is the full resolution texture
-		while level 2 is a 4x4 downsample.
+		while level 2 is a 4x4 downsample.</p>
 
-		Just as there are different pixel sampling methods, there are different
+		<p>Just as there are different pixel sampling methods, there are different
 		level sampling methods. Two methods are implemented: nearest and linear.
 		Nearest samples from mipmap with the closest level, while linear takes a
-		linear interpolation of samples for the two nearest levels.
+		linear interpolation of samples for the two nearest levels.</p>
 
-		Pixel sampling, level sampling, and the number of samples per pixel
+		<p>Pixel sampling, level sampling, and the number of samples per pixel
 		can all be combined and used independently about come with tradeoffs
-		between speed, memory usage, and antialiasing power.
+		between speed, memory usage, and antialiasing power.</p>
 
-		Pixel sampling is the fastest and has the least memory usage because
+		<p>Pixel sampling is the fastest and has the least memory usage because
 		it simply samples from the same texture an additional number of times.
 		It also has the least antialiasing power because it only samples from
-		a small number of pixels from the immediate surroundings.
+		a small number of pixels from the immediate surroundings.</p>
 
-		Below a comparision for the different combinations of techniques applied to an image
+		<p>Below a comparision for the different combinations of techniques applied to an image
+			with the level sampling technique on the top header, and the
+			pixel sampling technique on the left header.
+		</p>
 
 		<table class="default-table">
 			<tr>
@@ -399,17 +414,17 @@
 			</tr>
 		</table>
 
-		Level sampling is slower and requires more memory because it
+		<p>Level sampling is slower and requires more memory because it
 		computes the change in uv coordinates and stores mipmap textures
 		on top of the original texture.
 		This achieves higher antialiasing power because it the downsampled
 		textures can filter high frequencies better and capture more of the
-		original texture than a few pixel samples can.
+		original texture than a few pixel samples can.</p>
 
-		Increasing the umber of samples per pixel is the slowest and most memory
+		<p>Increasing the number of samples per pixel is the slowest and most memory
 		intensive as it effectively renders at a higher resolution,
 		requiring not just additional texture lookups,
-		but also running all steps of the rasterization pipeline for the additional pixels.
+		but also running all steps of the rasterization pipeline for the additional pixels.</p>
 
 		<!-- <h2>(Optional) Task 7: Extra Credit - Draw Something Creative!</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. -->
