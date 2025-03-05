@@ -40,17 +40,17 @@
 		
 		Link to GitHub repository: <a href="https://github.com/cal-cs184-student/sp25-hw2-hw2">https://github.com/cal-cs184-student/sp25-hw2-hw2</a>
 
-		<figure>
-			<img src="teapot.png" alt="Teapot" style="width:50%"/>
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
-
 		<!--
 		We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
 		-->
 
 		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+		
+		In the first section, we implemented de Casteljau's algorithm for evaluating Bézier curves and extended it to handle Bézier surfaces. This involved recursive linear interpolation to compute points on curves and surfaces at given parameters. We learned how Bézier curves and surfaces are constructed from control points and how they can be manipulated to create smooth, continuous shapes.
+			<br><br>
+		In the second section, we worked with triangle meshes and implemented key mesh operations, including area-weighted vertex normals, edge flip, edge split, and Loop subdivision for mesh upsampling. These operations required careful manipulation of the half-edge data structure. We gained a deeper understanding of how meshes are represented and how topological changes (like edge flips and splits) affect the geometry and connectivity of the mesh.
+			<br><br>
+		One of the most interesting insights was how loop subdivision progressively smooths out sharp features in a mesh, and how preprocessing (like symmetric edge splitting) can preserve sharp edges and corners. We also learned the importance of careful pointer management in the half-edge data structure, as incorrect assignments could lead to broken meshes or infinite loops.
 
 		<h2>Section I: Bezier Curves and Surfaces</h2>
 
@@ -213,16 +213,22 @@
 		of the cross product is proportional to area of the triangle, so the direction
 		of the resulting sum of normal vectors is area-weighted.
 
+		
 		<h4>Comparisions</h4>
-		<div style="display: flex; flex-wrap: wrap;">
-			<figure>
-				<img src="images/task3_without_vertex_normals.png"  style="max-width: 300px;">
-				<figcaption>Rendering without vertex normals</figcaption>
-			</figure>
-			<figure>
-				<img src="images/task3_with_vertex_normals.png"  style="max-width: 300px;">
-				<figcaption>Rendering with vertex normals</figcaption>
-			</figure>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="images/task3_without_vertex_normals.png" width="400px"/>
+				  <figcaption>Rendering without vertex normals</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="images/task3_with_vertex_normals.png" width="400px"/>
+				  <figcaption>Rendering with vertex normals</figcaption>
+				</td>
+			  </tr>
+			</table>
 		</div>
 
 		<h3>Part 4: Edge flip</h3>
@@ -389,22 +395,31 @@
 		the sharp edges and corners are progressively smoothed out,
 		as demonstrated by these screenshots.
 
-		<figure>
-			<img src="images/task6_torus_sharp.png">
-			<caption>Original mesh</caption>
-		</figure>
-		<figure>
-			<img src="images/task6_torus_subdivide1.png">
-			<caption>One subdivision</caption>
-		</figure>
-		<figure>
-			<img src="images/task6_torus_subdivide2.png">
-			<caption>Two subdivisions</caption>
-		</figure>
-		<figure>
-			<img src="images/task6_torus_subdivide3.png">
-			<caption>Three subdivisions</caption>
-		</figure>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="images/task6_torus_sharp.png" width="400px"/>
+				  <figcaption>Original mesh</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="images/task6_torus_subdivide1.png" width="400px"/>
+				  <figcaption>One subdivision</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="images/task6_torus_subdivide2.png" width="400px"/>
+				  <figcaption>Two subdivisions</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="images/task6_torus_subdivide3.png" width="400px"/>
+					<figcaption>Three subdivisions</figcaption>
+				  </td>
+			  </tr>
+			</table>
+		  </div>
 
 		This smoothing of sharp corners and edges can be reduced by adding "supporting geometry"
 		by splitting edges around the corner or edge in roughly the same direction
@@ -418,15 +433,20 @@
 			in a more symmetric mesh after repeated subdivisions.
 		</p>
 
-		<figure>
-			<img src="images/task6_cube_subdivide_preprocessing.png">
-			<caption>Preprocessing of cube before subdivison</caption>
-		</figure>
-
-		<figure>
-			<img src="images/task6_cube_subdivide_symmetric.png">
-			<caption>Preprocessing of cube before subdivison</caption>
-		</figure>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="images/task6_cube_subdivide_preprocessing.png" width="400px"/>
+				  <figcaption>Preprocessing of cube before subdivison</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="images/task6_cube_subdivide_symmetric.png" width="400px"/>
+				  <figcaption>Cube subdivided symmetrically</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 
 
 <!-- 		<h2>(Optional) Section III: Potential Extra Credit - Art Competition: Model something Creative</h2>
