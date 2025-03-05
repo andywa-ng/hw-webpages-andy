@@ -232,29 +232,48 @@
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<h3>Part 6: Loop subdivision for mesh upsampling</h3>
-		Our loop subdivision algorithm starts by calculating the new positions of existing
-		and new vertices, not changing the actual positions to prevent
-		changing the calculated positions.
+		<h4>Algorithm</h4>
+		<p>
+			Our loop subdivision algorithm starts by calculating the new positions of existing
+			and new vertices, not changing the actual positions to prevent
+			changing the calculated positions.
+		</p>
 
-		Next, all edges are split and the new vertex at the midpoint of the edge
-		is moved to its final position. All new position are calculated by in now,
-		so is it safe to change the vertex positions. 
+		<p>
+			A new vertex's position is a weight sum of the vertices in the triangles
+			that contain the split edge. An old vertex's position is a weight sum
+			of its original position and the sum of the positions of its neighbors.
+		</p>
 
-		Then all new edges (edges not making up an edge in the original mesh are)
-		are flipped if connecting a new and old vertex.
+		<p>
+			Next, all edges are split and the new vertex at the midpoint of the edge
+			is moved to its final position. All new position are calculated by in now,
+			so is it safe to change the vertex positions. 
+		</p>
 
-		Finally, the original vertices have their positions updated to their
-		final positions.
+		<p>
+			Then all new edges (edges not making up an edge in the original mesh are)
+			are flipped if connecting a new and old vertex.
+		</p>
 
-		For debugging, we found it helpful to print the address of specific
-		mesh elements and examine its neighbors in the GUI as well with the
-		<code>check_for</code> functions provided.
+		<p>
+			Finally, the original vertices have their positions updated to their
+			final positions.
+		</p>
 
-		When iterating over edges while splitting, care must be taken to prevent
-		infinite loops. We loop using a counter rather than the iterator. This
-		relies on new edges being appended to the end of the list.
+		<p>
+			For debugging, we found it helpful to print the address of specific
+			mesh elements and examine its neighbors in the GUI as well with the
+			<code>check_for</code> functions provided.
+		</p>
 
-		<h3>Observations</h3>
+		<p>
+			When iterating over edges while splitting, care must be taken to prevent
+			infinite loops. We loop using a counter rather than the iterator. This
+			relies on new edges being appended to the end of the list.
+		</p>
+
+		<h4>Observations</h4>
 		When subdividing a mesh with sharp edges and corners,
 		the sharp edges and corners are progressively smoothed out,
 		as demonstrated by these screenshots.
@@ -280,11 +299,13 @@
 		by splitting edges around the corner or edge in roughly the same direction
 		as the feature you want to keep sharp.
 
-		Repeatedly subdividing <code>dae/cube.dae</code> results in a asymmetric mesh.
-		Preprocessing the cube by splitting all edges such that the mesh is symmetric
-		before subdividing prevents this behavior. Beacuse the mesh is symmetric before dividing,
-		the splits and flips during the subdivision process are also symmetric, resulting
-		in a more symmetric mesh after repeated subdivisions.
+		<p>
+			Repeatedly subdividing <code>dae/cube.dae</code> results in a asymmetric mesh.
+			Preprocessing the cube by splitting all edges such that the mesh is symmetric
+			before subdividing prevents this behavior. Beacuse the mesh is symmetric before dividing,
+			the splits and flips during the subdivision process are also symmetric, resulting
+			in a more symmetric mesh after repeated subdivisions.
+		</p>
 
 		<figure>
 			<img src="images/task6_cube_subdivide_preprocessing.png">
