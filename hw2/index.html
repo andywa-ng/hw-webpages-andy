@@ -232,9 +232,69 @@
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<h3>Part 6: Loop subdivision for mesh upsampling</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		Our loop subdivision algorithm starts by calculating the new positions of existing
+		and new vertices, not changing the actual positions to prevent
+		changing the calculated positions.
 
-		<h2>(Optional) Section III: Potential Extra Credit - Art Competition: Model something Creative</h2>
+		Next, all edges are split and the new vertex at the midpoint of the edge
+		is moved to its final position. All new position are calculated by in now,
+		so is it safe to change the vertex positions. 
+
+		Then all new edges (edges not making up an edge in the original mesh are)
+		are flipped if connecting a new and old vertex.
+
+		Finally, the original vertices have their positions updated to their
+		final positions.
+
+		For debugging, we found it helpful to print the address of specific
+		mesh elements and examine its neighbors in the GUI as well with the
+		<code>check_for</code> functions provided.
+
+		When iterating over edges while splitting, care must be taken to prevent
+		infinite loops. We loop using a counter rather than the iterator. This
+		relies on new edges being appended to the end of the list.
+
+		<h3>Observations</h3>
+		When subdividing a mesh with sharp edges and corners,
+		the sharp edges and corners are progressively smoothed out,
+		as demonstrated by these screenshots.
+
+		<figure>
+			<img src="images/task6_torus_sharp.png">
+			<caption>Original mesh</caption>
+		</figure>
+		<figure>
+			<img src="images/task6_torus_subdivide1.png">
+		</figure>
+		<figure>
+			<img src="images/task6_torus_subdivide2.png">
+		</figure>
+		<figure>
+			<img src="images/task6_torus_subdivide3.png">
+		</figure>
+
+		This smoothing of sharp corners and edges can be reduced by adding "supporting geometry"
+		by splitting edges around the corner or edge in roughly the same direction
+		as the feature you want to keep sharp.
+
+		Repeatedly subdividing <code>dae/cube.dae</code> results in a asymmetric mesh.
+		Preprocessing the cube by splitting all edges such that the mesh is symmetric
+		before subdividing prevents this behavior. Beacuse the mesh is symmetric before dividing,
+		the splits and flips during the subdivision process are also symmetric, resulting
+		in a more symmetric mesh after repeated subdivisions.
+
+		<figure>
+			<img src="images/task6_cube_subdivide_preprocessing.png">
+			<caption>Preprocessing of cube before subdivison</caption>
+		</figure>
+
+		<figure>
+			<img src="images/task6_cube_subdivide_symmetric.png">
+			<caption>Preprocessing of cube before subdivison</caption>
+		</figure>
+
+
+<!-- 		<h2>(Optional) Section III: Potential Extra Credit - Art Competition: Model something Creative</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<h2>Additional Notes (please remove)</h2>
@@ -247,6 +307,6 @@
 				</ul>
 			</li>
 		</ul>
-		</div>
+ -->		</div>
 	</body>
 </html>
