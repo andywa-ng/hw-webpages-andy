@@ -197,13 +197,123 @@
 		<h2>Section II: Triangle Meshes and Half-Edge Data Structure</h2>
 
 		<h3>Part 3: Area-weighted vertex normals</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<h3>Part 4: Edge flip</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<p>
+			To implement the edge flip operation, I used half-edges to  reassign pointers and update the connections between mesh elements. The process involved:
+		  </p>
+		  <ul>
+			<li>Identifying the two triangles sharing the edge to be flipped.</li>
+			<li>Reassigning the half-edges, vertices, and faces to reflect the new connections after the flip.</li>
+			<li>Ensuring all pointers (e.g., next, twin, vertex, and face) were correctly updated to avoid lost pointers.</li>
+		  </ul>
+		  <p>
+			The most challenging part was reassigning the pointers, as incorrectly updating them could lead to the mesh being broken and holes to due to missing faces. To debug this, I used print statements to verify if the pointer assignemnts were correct at each step and checked the mesh after each flip to ensure the operation was performed correctly.
+		  </p>
+		  
+		  <h4>Debugging Journey</h4>
+		  <p>
+			Initially, I encountered issues where the mesh would break or produce incorrect geometry due to misassigned pointers. For example:
+		  </p>
+		  <ul>
+			<li>I mistakenly swapped the next pointers of half-edges, causing infinite loops during traversal.</li>
+			<li>I forgot to update the face pointers for certain half-edges, leading to incorrect face assignments.</li>
+		  </ul>
+		  <p>
+			To resolve these issues, I checked each pointer assignment and compared the mesh before and after the flip. Using print statements and setting breakpoints in Xcode helped me identify and fix the errors. Additionally, I tested the operation by drawing out a simple mesh on paper before applying it to complex models like the teapot.
+		  </p>
+
+		  <div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="images/task4_1.png" width="400px"/>
+				  <figcaption>Before flip</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="images/task4_2.png" width="400px"/>
+				  <figcaption>Flip 1</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="images/task4_3.png" width="400px"/>
+				  <figcaption>Flip 2</figcaption>
+				</td>
+			  </tr>
+			</table>
+		  </div>
 
 		<h3>Part 5: Edge split</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<p>
+		The edge split operation involved dividing an edge into two by inserting a new vertex at its midpoint and updating the mesh connections. 
+		
+		<ul>
+			<li> I started by identifying the two triangles sharing the target edge and extracting all relevant half-edges, vertices, and faces. </li>
+			<li> Next, I created a new vertex at the midpoint of the edge and added new half-edges, edges, and faces to accommodate the split. </li>
+			<li> Pointer reassignment (next, twin, vertex, and face) was critical to ensure that the mesh remained connected and that no pointers were lost. </li>
+		</ul>
+	
+		</p>
+
+		<h4>Debugging Journey</h4>
+		<p>
+		Debugging the edge split operation was challenging. 
+		I used print statements to verify the pointer assignments and checked the mesh after each split to catch issues like incorrect face assignments or broken connections.
+		Drawing out the process of splitting a mesh helped me address some problems before applying the operation to the teapot.
+		An issue I made was forgetting to update the twin pointers for new half-edges, which caused inconsistencies in the mesh.
+		To fix this, I had to verify all of the pointers in the system before and after the operation.
+		</p>
+
+		  <div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="images/task5_1.png" width="400px"/>
+				  <figcaption>Before split</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="images/task5_2.png" width="400px"/>
+				  <figcaption>Split 1</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="images/task5_3.png" width="400px"/>
+				  <figcaption>Split 2</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="images/task5_4.png" width="400px"/>
+					<figcaption>Split 3</figcaption>
+				  </td>
+			  </tr>
+			</table>
+		  </div>
+
+		  <div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="images/task5_5.png" width="400px"/>
+				  <figcaption>Before split</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="images/task5_6.png" width="400px"/>
+				  <figcaption>Flip once</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="images/task5_7.png" width="400px"/>
+				  <figcaption>Split twice</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="images/task5_8.png" width="400px"/>
+					<figcaption>Flip twice</figcaption>
+				  </td>
+			  </tr>
+			</table>
+		  </div>
 
 		<h3>Part 6: Loop subdivision for mesh upsampling</h3>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
