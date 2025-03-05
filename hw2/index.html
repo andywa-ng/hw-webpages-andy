@@ -34,7 +34,7 @@
 
 		<br>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-pants/hw2/index.html">https://cal-cs184-student.github.io/hw-webpages-pants/hw2/index.html</a>
 
 		<br>
 		
@@ -198,6 +198,33 @@
 
 		<h3>Part 3: Area-weighted vertex normals</h3>
 
+		<h4>Implementation</h4>
+		Repeat for each triangle that contains the starting vertex:
+		<ol>
+			<li>Get the three vertices making up the triangle</li>
+			<li>Compute the two vectors from the starting vertex to each of the other two vertices</li>
+			<li>Compute the cross product of these two vectors. This is a normal vector to the triangle</li>
+			<li>Add the cross product to a running sum of normal vectors</li>
+		</ol>
+		
+		Finally, return the normalized sum of normal vectors.
+
+		The resulting normal vector is area-weighted because the magnitude
+		of the cross product is proportional to area of the triangle, so the direction
+		of the resulting sum of normal vectors is area-weighted.
+
+		<h4>Comparisions</h4>
+		<div style="display: flex; flex-wrap: wrap;">
+			<figure>
+				<img src="images/task3_without_vertex_normals.png"  style="max-width: 300px;">
+				<figcaption>Rendering without vertex normals</figcaption>
+			</figure>
+			<figure>
+				<img src="images/task3_with_vertex_normals.png"  style="max-width: 300px;">
+				<figcaption>Rendering with vertex normals</figcaption>
+			</figure>
+		</div>
+
 		<h3>Part 4: Edge flip</h3>
 		<p>
 			To implement the edge flip operation, I used half-edges to  reassign pointers and update the connections between mesh elements. The process involved:
@@ -316,9 +343,93 @@
 		  </div>
 
 		<h3>Part 6: Loop subdivision for mesh upsampling</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<h4>Algorithm</h4>
+		<p>
+			Our loop subdivision algorithm starts by calculating the new positions of existing
+			and new vertices, not changing the actual positions to prevent
+			changing the calculated positions.
+		</p>
 
-		<h2>(Optional) Section III: Potential Extra Credit - Art Competition: Model something Creative</h2>
+		<p>
+			A new vertex's position is a weight sum of the vertices in the triangles
+			that contain the split edge. An old vertex's position is a weight sum
+			of its original position and the sum of the positions of its neighbors.
+		</p>
+
+		<p>
+			Next, all edges are split and the new vertex at the midpoint of the edge
+			is moved to its final position. All new position are calculated by in now,
+			so is it safe to change the vertex positions. 
+		</p>
+
+		<p>
+			Then all new edges (edges not making up an edge in the original mesh are)
+			are flipped if connecting a new and old vertex.
+		</p>
+
+		<p>
+			Finally, the original vertices have their positions updated to their
+			final positions.
+		</p>
+
+		<p>
+			For debugging, we found it helpful to print the address of specific
+			mesh elements and examine its neighbors in the GUI as well with the
+			<code>check_for</code> functions provided.
+		</p>
+
+		<p>
+			When iterating over edges while splitting, care must be taken to prevent
+			infinite loops. We loop using a counter rather than the iterator. This
+			relies on new edges being appended to the end of the list.
+		</p>
+
+		<h4>Observations</h4>
+		When subdividing a mesh with sharp edges and corners,
+		the sharp edges and corners are progressively smoothed out,
+		as demonstrated by these screenshots.
+
+		<figure>
+			<img src="images/task6_torus_sharp.png">
+			<caption>Original mesh</caption>
+		</figure>
+		<figure>
+			<img src="images/task6_torus_subdivide1.png">
+			<caption>One subdivision</caption>
+		</figure>
+		<figure>
+			<img src="images/task6_torus_subdivide2.png">
+			<caption>Two subdivisions</caption>
+		</figure>
+		<figure>
+			<img src="images/task6_torus_subdivide3.png">
+			<caption>Three subdivisions</caption>
+		</figure>
+
+		This smoothing of sharp corners and edges can be reduced by adding "supporting geometry"
+		by splitting edges around the corner or edge in roughly the same direction
+		as the feature you want to keep sharp.
+
+		<p>
+			Repeatedly subdividing <code>dae/cube.dae</code> results in a asymmetric mesh.
+			Preprocessing the cube by splitting all edges such that the mesh is symmetric
+			before subdividing prevents this behavior. Beacuse the mesh is symmetric before dividing,
+			the splits and flips during the subdivision process are also symmetric, resulting
+			in a more symmetric mesh after repeated subdivisions.
+		</p>
+
+		<figure>
+			<img src="images/task6_cube_subdivide_preprocessing.png">
+			<caption>Preprocessing of cube before subdivison</caption>
+		</figure>
+
+		<figure>
+			<img src="images/task6_cube_subdivide_symmetric.png">
+			<caption>Preprocessing of cube before subdivison</caption>
+		</figure>
+
+
+<!-- 		<h2>(Optional) Section III: Potential Extra Credit - Art Competition: Model something Creative</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<h2>Additional Notes (please remove)</h2>
@@ -331,6 +442,6 @@
 				</ul>
 			</li>
 		</ul>
-		</div>
+ -->		</div>
 	</body>
 </html>
