@@ -32,14 +32,10 @@
 
 		<br>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to webpage: <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		<br>
+		Link to GitHub repository: <a href="https://github.com/cal-cs184-student/sp25-hw3-gower-power-2">https://github.com/cal-cs184-student/sp25-hw3-gower-power-2</a>
 		
-		<figure>
-			<img src="cornell.png" alt="Cornell Boxes with Bunnies" style="width:70%"/>
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
-
 		<!--
 		We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
 		-->
@@ -48,36 +44,147 @@
 		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
 		<h2>Part 1: Ray Generation and Scene Intersection</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		
+		<h3>1. Ray Generation</h3>
+        <p>
+            The first step in the rendering pipeline is ray generation. Rays are created from the camera and pass through each pixel of the image to determine what the camera "sees" in the scene.
+        </p>
+        <p>
+            For each pixel, multiple rays are generated for anti-aliasing. Pixel coordinates are mapped to normalized image coordinates (<code>[0, 1]</code> in both x and y), which are then transformed into camera space. The camera is at the origin <code>(0, 0, 0)</code> and looks along the <code>-Z</code> axis.
+        </p>
+        <p>
+            The ray's origin is the camera's position, and its direction is determined by the corresponding point on the virtual sensor plane (at <code>Z = -1</code>). The ray is then transformed into world space using the camera-to-world transformation matrix.
+        </p>
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+        <h3>2. Ray Intersection</h3>
+        <p>
+            After ray generation, the next step is to determine if rays intersect with objects in the scene. This involves intersection tests for triangles and spheres.
+        </p>
+
+        <h4>2.1 Triangle Intersection</h4>
+        <p>
+            The triangle intersection algorithm uses ray-plane intersection and barycentric coordinates:
+        </p>
+        <ol>
+            <li>
+                Ray-Plane Intersection:
+                <ul>
+                    <li>Compute the plane equation using the triangle's vertices.</li>
+                    <li>Solve for the ray parameter <code>t</code> where the ray intersects the plane.</li>
+                    <li>Check if <code>t</code> lies within the valid range <code>[min_t, max_t]</code>.</li>
+                </ul>
+            </li>
+            <li>
+                Barycentric Coordinates:
+                <ul>
+                    <li>Compute barycentric coordinates <code>(u, v)</code> of the intersection point relative to the triangle.</li>
+                    <li>Check if the point lies inside the triangle by verifying <code>u >= 0</code>, <code>v >= 0</code>, and <code>u + v <= 1</code>.</li>
+                </ul>
+            </li>
+            <li>
+            Interpolate Normals:
+                <ul>
+                    <li>If the intersection is valid, interpolate the vertex normals using barycentric coordinates to compute the surface normal.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h4>2.2 Sphere Intersection</h4>
+
+        <ol>
+            <li>
+                Quadratic Equation:
+                <ul>
+                    <li>Compute coefficients <code>a</code>, <code>b</code>, and <code>c</code> based on the ray's origin, direction, and sphere's center and radius.</li>
+                    <li>Solve for roots <code>t1</code> and <code>t2</code> using the quadratic formula.</li>
+                </ul>
+            </li>
+            <li>
+                Root Validity Check:
+                <ul>
+                    <li>Check if the roots are within the valid range <code>[min_t, max_t]</code>.</li>
+                    <li>Select the smallest valid <code>t</code> value as the closest intersection.</li>
+                </ul>
+            </li>
+            <li>
+                Compute Normal:
+                <ul>
+                    <li>Compute the surface normal at the intersection point as the vector from the sphere's center to the intersection point, normalized.</li>
+                </ul>
+            </li>
+        </ol>
+
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="images/CBspheres.png" width="400px"/>
+				  <figcaption>Spheres</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="cornell.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="images/teapot.png" width="400px"/>
+				  <figcaption>Teapot</figcaption>
 				</td>
 			  </tr>
 			</table>
 		</div>
 		
 		<h2>Part 2: Bounding Volume Hierarchy</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		
+		<h3>BVH Construction Algorithm</h3>
+        <p>
+            The BVH construction algorithm recursively partitions the scene primitives into a binary tree. Each node in the tree contains a bounding box that encloses all primitives in its subtree.
+        </p>
+        <ol>
+            <li>
+                Compute Bounding Box:
+                <ul>
+                    <li>For the current set of primitives, compute the bounding box that encloses all of them.</li>
+                </ul>
+            </li>
+            <li>
+                Check Leaf Nodes:
+                <ul>
+                    <li>If the number of primitives is less than or equal to the maximum leaf size, create a leaf node with the computed bounding box and store the primitives.</li>
+                </ul>
+            </li>
+            <li>
+                Split Primitives:
+                <ul>
+                    <li>Choose the axis with the largest extent of the bounding box for splitting.</li>
+                    <li>Compute the split point as the average centroid of the primitives along the chosen axis.</li>
+                    <li>Partition the primitives into left and right groups based on the split point.</li>
+                </ul>
+            </li>
+            <li>
+                Recursively construct the left and right child nodes using the partitioned primitives.</li>
+            </li>
+			
+		<br>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+				<tr>
+				<td style="text-align: center;">
+					<img src="images/cow.png" width="400px"/>
+					<figcaption>Cow</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="images/maxplank.png" width="400px"/>
+					<figcaption>Maxplank</figcaption>
+				</td>
+				</tr>
+				<td style="text-align: center;">
+					<img src="images/lucy.png" width="400px"/>
+					<figcaption>Lucy</figcaption>
+				</td>
+				</tr>
+			</table>
+		</div>
+        </ol>
+
+		BVH acceleration significantly reduces rendering times for scenes with moderately complex geometries. Without BVH, rendering times are very long due to the high number of ray-primitive intersection tests. With BVH, the rendering times are reduced by an order of magnitude, as the BVH allows for efficient removal of large groups of primitives that a ray is guaranteed not to intersect.
+		[ADD EXAMPLES HERE]
 
 		<h2>Part 3: Direct Illumination</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
@@ -91,6 +198,11 @@
 		<h2>(Optional) Part 6: Extra Credit Opportunities</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 		
+		<figure>
+			<img src="images/example_image.png" alt="Cornell Boxes with Bunnies" style="width:70%"/>
+			<figcaption>You can add images with captions!</figcaption>
+		</figure>
+
 		<h2>Additional Notes (please remove)</h2>
 		<ul>
 			<li>You can also add code if you'd like as so: <code>code code code</code></li>
