@@ -32,7 +32,7 @@
 
 		<br>
 
-		Link to webpage: <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to webpage: <a href="https://andywa-ng.github.io/hw-webpages-andy/">https://andywa-ng.github.io/hw-webpages-andy/</a>
 		<br>
 		Link to GitHub repository: <a href="https://github.com/cal-cs184-student/sp25-hw3-gower-power-2">https://github.com/cal-cs184-student/sp25-hw3-gower-power-2</a>
 		
@@ -45,7 +45,7 @@
 
 		<h2>Part 1: Ray Generation and Scene Intersection</h2>
 		
-		<h3>1. Ray Generation</h3>
+		<h3>Ray Generation</h3>
         <p>
             The first step in the rendering pipeline is ray generation. Rays are created from the camera and pass through each pixel of the image to determine what the camera "sees" in the scene.
         </p>
@@ -56,12 +56,12 @@
             The ray's origin is the camera's position, and its direction is determined by the corresponding point on the virtual sensor plane (at <code>Z = -1</code>). The ray is then transformed into world space using the camera-to-world transformation matrix.
         </p>
 
-        <h3>2. Ray Intersection</h3>
+        <h3>Ray Intersection</h3>
         <p>
             After ray generation, the next step is to determine if rays intersect with objects in the scene. This involves intersection tests for triangles and spheres.
         </p>
 
-        <h4>2.1 Triangle Intersection</h4>
+        <h4>Triangle Intersection</h4>
         <p>
             The triangle intersection algorithm uses ray-plane intersection and barycentric coordinates:
         </p>
@@ -89,7 +89,7 @@
             </li>
         </ol>
 
-        <h4>2.2 Sphere Intersection</h4>
+        <h4>Sphere Intersection</h4>
 
         <ol>
             <li>
@@ -184,10 +184,73 @@
         </ol>
 
 		BVH acceleration significantly reduces rendering times for scenes with moderately complex geometries. Without BVH, rendering times are very long due to the high number of ray-primitive intersection tests. With BVH, the rendering times are reduced by an order of magnitude, as the BVH allows for efficient removal of large groups of primitives that a ray is guaranteed not to intersect.
-		[ADD EXAMPLES HERE]
+		
+		For example, when rendering dae/sky/CBlucy.dae, my computer only took 0.89s with BVH, compared to slightly under 34s without.
 
 		<h2>Part 3: Direct Illumination</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+		<h3>Uniform Hemisphere Sampling</h4>
+		<ol>
+			<li>Creates local coordinate system with normal as Z-axis
+			</li>
+			<li>Uses uniform hemisphere sampler to get random directions
+			</li>
+			<li>Creates ray with epsilon offset to prevent self-intersection
+			</li>
+			<li>Checks if ray hits an emissive object (light source)
+			</li>
+			<li>Compute BSDF, cosine term, and light contribution
+			</li>
+			<li>Normalizes by sample count and hemisphere PDF (1/(2π))
+			</li>
+		</ol>
+
+
+            <h3>Light Importance Sampling</h3>
+			<ol>
+				<li>Process each light source in the scene
+				</li>
+				<li>Get light direction, distance, PDF and emitted radiance
+				</li>
+				<li>Create shadow ray with precise distance bounds
+				</li>
+				<li>Check if path to light is unobstructed
+				</li>
+				<li>Compute full lighting contribution with proper PDF
+				</li>
+				<li>Optimize for delta lights that need only one sample
+				</li>
+			</ol>
+
+	<br>
+
+	<div style="display: flex; flex-direction: column; align-items: center;">
+		<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			<tr>
+			<td style="text-align: center;">
+				<img src="images/direct lighting.png" width="400px"/>
+				<figcaption>Uniform Hemisphere (64 samples)</figcaption>
+			</td>
+			<td style="text-align: center;">
+				<img src="images/importance sampling.png" width="400px"/>
+				<figcaption>Importance Sampling (16 samples)</figcaption>
+			</td>
+			</tr>
+		</table>
+	</div>
+
+	<br>
+	With hemisphere sampling, soft shadows remain noisy and speckled even with 64 samples.
+	With importance sampling, clean soft shadows emerge with just 16 samples.
+
+	<br>
+
+    <div class="analysis">
+        <p>
+            The uniform hemisphere sampling method produces noisier results because it wastes samples on directions that don't contribute to illumination (like empty space or non-emissive objects), requiring many more samples to converge. Light importance sampling dramatically reduces noise by focusing samples on directions known to contribute light (toward actual light sources), with each sample providing more meaningful information. While hemisphere sampling handles all lighting situations uniformly, importance sampling is particularly effective for small or point light sources where uniform sampling would rarely hit the light. The tradeoff is that importance sampling requires more complex light-specific sampling code and PDF calculations, but the visual quality improvement is substantial, especially for scenes with small or directional light sources.
+        </p>
+    </div>
+
 
 		<h2>Part 4: Global Illumination</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
