@@ -28,7 +28,7 @@
 	<body>
 		<div class="container">
 		<h1>CS184/284A Spring 2025 Homework 3 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+		<div style="text-align: center;">Names: Andy Wang, Christian Roque-Ayala </div>
 
 		<br>
 
@@ -189,93 +189,415 @@
 
 		<h2>Part 3: Direct Illumination</h2>
 
-		<h3>Uniform Hemisphere Sampling</h4>
-		<ol>
-			<li>Creates local coordinate system with normal as Z-axis
-			</li>
-			<li>Uses uniform hemisphere sampler to get random directions
-			</li>
-			<li>Creates ray with epsilon offset to prevent self-intersection
-			</li>
-			<li>Checks if ray hits an emissive object (light source)
-			</li>
-			<li>Compute BSDF, cosine term, and light contribution
-			</li>
-			<li>Normalizes by sample count and hemisphere PDF (1/(2π))
-			</li>
-		</ol>
-
-
-            <h3>Light Importance Sampling</h3>
+		<h3>
+			Uniform Hemisphere Sampling</h4>
 			<ol>
-				<li>Process each light source in the scene
+				<li>
+					Creates local coordinate system with normal as Z-axis
 				</li>
-				<li>Get light direction, distance, PDF and emitted radiance
+				<li>
+					Uses uniform hemisphere sampler to get random directions
 				</li>
-				<li>Create shadow ray with precise distance bounds
+				<li>
+					Creates ray with epsilon offset to prevent self-intersection
 				</li>
-				<li>Check if path to light is unobstructed
+				<li>
+					Checks if ray hits an emissive object (light source)
 				</li>
-				<li>Compute full lighting contribution with proper PDF
+				<li>
+					Compute BSDF, cosine term, and light contribution
 				</li>
-				<li>Optimize for delta lights that need only one sample
+				<li>
+					Normalizes by sample count and hemisphere PDF (1/(2π))
 				</li>
 			</ol>
 
-	<br>
 
-	<div style="display: flex; flex-direction: column; align-items: center;">
-		<table style="width: 100%; text-align: center; border-collapse: collapse;">
-			<tr>
-			<td style="text-align: center;">
-				<img src="images/direct lighting.png" width="400px"/>
-				<figcaption>Uniform Hemisphere (64 samples)</figcaption>
-			</td>
-			<td style="text-align: center;">
-				<img src="images/importance sampling.png" width="400px"/>
-				<figcaption>Importance Sampling (16 samples)</figcaption>
-			</td>
-			</tr>
-		</table>
-	</div>
+			<h3>Light Importance Sampling</h3>
+			<ol>
+				<li>
+					Process each light source in the scene
+				</li>
+				<li>
+					Get light direction, distance, PDF and emitted radiance
+				</li>
+				<li>
+					Create shadow ray with precise distance bounds
+				</li>
+				<li>
+					Check if path to light is unobstructed
+				</li>
+				<li>
+					Compute full lighting contribution with proper PDF
+				</li>
+				<li>
+					Optimize for delta lights that need only one sample
+				</li>
+			</ol>
 
-	<br>
-	With hemisphere sampling, soft shadows remain noisy and speckled even with 64 samples.
-	With importance sampling, clean soft shadows emerge with just 16 samples.
+			<br>
 
-	<br>
+			<div style="display: flex; flex-direction: column; align-items: center;">
+				<table style="width: 100%; text-align: center; border-collapse: collapse;">
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/p3_bunny_h.png" width="400px" />
+						</td>
+						<td style="text-align: center;">
+							<img src="images/p3_bunny_i.png" width="400px" />
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: center;">
+							<img src="images/p3_spheres_h.png" width="400px" />
+							<figcaption>Uniform Hemisphere (64 samples pp, 32 light rays)</figcaption>
+						</td>
+						<td style="text-align: center;">
+							<img src="images/p3_spheres_i.png" width="400px" />
+							<figcaption>Importance Sampling (64 samples pp, 32 light rays)</figcaption>
+						</td>
+					</tr>
+				</table>
+			</div>
 
-    <div class="analysis">
-        <p>
-            The uniform hemisphere sampling method produces noisier results because it wastes samples on directions that don't contribute to illumination (like empty space or non-emissive objects), requiring many more samples to converge. Light importance sampling dramatically reduces noise by focusing samples on directions known to contribute light (toward actual light sources), with each sample providing more meaningful information. While hemisphere sampling handles all lighting situations uniformly, importance sampling is particularly effective for small or point light sources where uniform sampling would rarely hit the light. The tradeoff is that importance sampling requires more complex light-specific sampling code and PDF calculations, but the visual quality improvement is substantial, especially for scenes with small or directional light sources.
-        </p>
-    </div>
+			<br>
+			With hemisphere sampling, soft shadows remain noisy and speckled even with 64 samples.
+			With importance sampling, these shadows are significantly cleaner with the same amount of samples.
+
+			<br>
+
+			<div class="analysis">
+				<p>
+					The uniform hemisphere sampling method produces noisier results because it wastes samples on directions that don't contribute to illumination (like empty space or non-emissive objects), requiring many more samples to converge. Light importance sampling dramatically reduces noise by focusing samples on directions known to contribute light (toward actual light sources), with each sample providing more meaningful information. While hemisphere sampling handles all lighting situations uniformly, importance sampling is particularly effective for small or point light sources where uniform sampling would rarely hit the light. The tradeoff is that importance sampling requires more complex light-specific sampling code and PDF calculations, but the visual quality improvement is substantial, especially for scenes with small or directional light sources.
+				</p>
+			</div>
+
+			<figure>
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/p3_bunny_l1.png" width="400px" />
+								<figcaption>1 light ray</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p3_bunny_l4.png" width="400px" />
+								<figcaption>4 light rays</figcaption>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/p3_bunny_l16.png" width="400px" />
+								<figcaption>16 light rays</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p3_bunny_l64.png" width="400px" />
+								<figcaption>64 light rays</figcaption>
+							</td>
+						</tr>
+					</table>
+
+				</div>
+				<figcaption>
+					CBBunny.dae rendered with 1 sample per pixel with varying amounts of light rays.
+					Notice the soft shadows on the bunny; with more light rays, the darker parts of the shadows with the lighter parts are better distinguished.
+				</figcaption>
+			</figure>
 
 
-		<h2>Part 4: Global Illumination</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			<h2>Part 4: Global Illumination</h2>
 
-		<h2>Part 5: Adaptive Sampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			<h3>Sampling with Diffuse BSDF</h3>
+			<ol>
+				<li>
+					Sample the incoming ray with the BSDF's sampler's <code>get_sample</code> method, save it to <code>wi</code>
+				</li>
+				<li>
+					Compute the BSDF value for the sampled direction using <code>f(wo, wi)</code>
+				</li>
+			</ol>
 
-		<h2>(Optional) Part 6: Extra Credit Opportunities</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-		
-		<figure>
-			<img src="images/example_image.png" alt="Cornell Boxes with Bunnies" style="width:70%"/>
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
+			<h3>Global Illumination with up to N Bounces of Light</h3>
 
-		<h2>Additional Notes (please remove)</h2>
-		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
-		</ul>
-		</div>
-	</body>
+			<ol>
+				<li>
+					If no intersection occurs, return black or sample from the environment light
+				</li>
+				<li>
+					Return the sum of the zero-bounce radiance and radiance from at least one bounce (direct and indirect illumination)
+				</li>
+			</ol>
+
+			<h4>At Least One Bounce Radiance Algorithm</h4>
+			<ol>
+				<li>
+					Add one-bounce radiance (direct lighting) to the total lighting variable <code>L_out</code>
+				</li>
+				<li>
+					Stop the recursion and return <code>L_out</code> (only direct lighting contribution) if ray depth limit has been reached
+				</li>
+				<li>
+					Sample an incoming direction for the indirect lighting
+				</li>
+				<li>
+					Create a new ray for the indirect lighting using this sampled direction and the hit point
+				</li>
+				<li>
+					Try intersecting the scene with this new ray
+				</li>
+				<li>
+					If an intersection is found, trace the new ray by recursively calling this algorithm using the new ray and found intersection and add this radiance (the indirect lighting contribution) to <code>L_out</code>. Return <code>L_out</code>
+				</li>
+			</ol>
+
+			<h3>Global Illumination with Russian Roulette</h3>
+			<p>
+				The <code>at_least_one_bounce_radiance</code> algorithm must be changed to apply Russian roulette style termination.
+				After tracing the new ray in the last step and before adding the indirect lighting contribution to <code>L_out</code>, we choose to terminate the recursion with a 35% probability.
+				If the recursion is terminated, no lighting contribution is returned.
+				If the recursion continues, we scale the indirect lighting contribution by <code>1 / (1 - termination_probability)</code> before adding it to <code>L_out</code>.
+			</p>
+
+
+			<figure>
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/p4_spheres_direct.png" width="400px" />
+								<figcaption>Only direct illumination</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_spheres_indirect.png" width="400px" />
+								<figcaption>Only indirect illumination</figcaption>
+							</td>
+						</tr>
+					</table>
+
+				</div>
+				<figcaption>
+					Comparison of direct and indirect lighting effects.
+					Notice how indirect illumination contributes most of the color in the shading of an image, while direct illumination provides most of the light that directly hits surfaces.
+				</figcaption>
+			</figure>
+			<figure>
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_0.png" width="200px" />
+								<figcaption>0th bounce</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_1.png" width="200px" />
+								<figcaption>1st bounce</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_2.png" width="200px" />
+								<figcaption>2nd bounce</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_3.png" width="200px" />
+								<figcaption>3rd bounce</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_4.png" width="200px" />
+								<figcaption>4th bounce</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_5.png" width="200px" />
+								<figcaption>5th bounce</figcaption>
+							</td>
+						</tr>
+					</table>
+
+				</div>
+				<figcaption>
+					The contribution of lighting effects from single bounces of light. Take note of the 2nd and 3rd bounces of light; the 2nd bounce contributes the lighter colored shading as well as the color of the ceiling, while the third bounce contributes the darker colored shading.
+				</figcaption>
+			</figure>
+			<figure>
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_0.png" width="200px" />
+								<figcaption>0th bounce</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_1_acc.png" width="200px" />
+								<figcaption>1st bounce</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_2_acc.png" width="200px" />
+								<figcaption>2nd bounce</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_3_acc.png" width="200px" />
+								<figcaption>3rd bounce</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_4_acc.png" width="200px" />
+								<figcaption>4th bounce</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_5_acc.png" width="200px" />
+								<figcaption>5th bounce</figcaption>
+							</td>
+						</tr>
+					</table>
+
+				</div>
+				<figcaption>
+					The same 5 bounces of light being accumulated one by one to create the final image.
+					Notice that as later bounces of light are added into the image, the colored shading effects become more pronounced.
+					Particularly, we start to see the color of the red and blue walls being reflected onto the shadows of the bunny and the white walls.
+				</figcaption>
+			</figure>
+			<figure>
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_0.png" width="200px" />
+								<figcaption>Ray depth: 0</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_1_rr.png" width="200px" />
+								<figcaption>Ray depth: 1</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_2_rr.png" width="200px" />
+								<figcaption>Ray depth: 2</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_3_rr.png" width="200px" />
+								<figcaption>Ray depth: 3</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_4_rr.png" width="200px" />
+								<figcaption>Ray depth: 4</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_bunny_100_rr.png" width="200px" />
+								<figcaption>Ray depth: 100</figcaption>
+							</td>
+						</tr>
+					</table>
+
+				</div>
+				<figcaption>
+					Russian roulette rendering with different max ray depths.
+				</figcaption>
+			</figure>
+			<figure>
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/p4_spheres_1.png" width="200px" />
+								<figcaption>1 sample pp</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_spheres_2.png" width="200px" />
+								<figcaption>2 sample pp</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_spheres_4.png" width="200px" />
+								<figcaption>4 sample pp</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_spheres_8.png" width="200px" />
+								<figcaption>8 sample pp</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_spheres_16.png" width="200px" />
+								<figcaption>16 sample pp</figcaption>
+							</td>
+							<td style="text-align: center;">
+								<img src="images/p4_spheres_1024.png" width="200px" />
+								<figcaption>1024 sample pp</figcaption>
+							</td>
+						</tr>
+					</table>
+
+				</div>
+				<figcaption>
+					CBSpheres.dae rendered at different sample per pixel rates and with 4 light rays.
+					Notice how the image gets smoother as well as how the indirect lighting effects become more pronounced.
+				</figcaption>
+			</figure>
+
+			<h2>Part 5: Adaptive Sampling</h2>
+			<ol>
+				<li>
+					Get a random sample within the pixel
+				</li>
+				<li>
+					Map the sample to the pixel's unnormalized coordinates
+				</li>
+				<li>
+					Normalize the pixel coordinates to [0,1] x [0,1]
+				</li>
+				<li>
+					Generate a ray through the normalized coordinates
+				</li>
+				<li>
+					Estimate the radiance along the ray
+				</li>
+				<li>
+					Accumulate the radiance
+				</li>
+				<li>
+					Compute the illuminance of the sample
+				</li>
+				<li>
+					Check for convergence every <code>samplesPerBatch</code> samples. Stop sampling if the pixel has converged
+				</li>
+				<li>
+					Repeat steps 1-8 up to <code>numSamples</code> times (assuming pixel doesn't converge)
+				</li>
+				<li>
+					After the loop is finished, average accumulated radiance over actual number of samples
+				</li>
+				<li>
+					Update pixel in sampleBuffer with computed radiance
+				</li>
+				<li>
+					Update sample count for the pixel
+				</li>
+			</ol>
+
+			<figure>
+				<div style="display: flex; flex-direction: column; align-items: center;">
+					<table style="width: 100%; text-align: center; border-collapse: collapse;">
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/bunny_adapt.png" width="400px" />
+							</td>
+							<td style="text-align: center;">
+								<img src="images/bunny_adapt_rate.png" width="400px" />
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: center;">
+								<img src="images/spheres_adapt.png" width="400px" />
+							</td>
+							<td style="text-align: center;">
+								<img src="images/spheres_adapt_rate.png" width="400px" />
+							</td>
+						</tr>
+					</table>
+
+				</div>
+				<figcaption>
+					Two noise-free scenes and their adaptive sampling rate images. 
+					Red regions in the sampling rate regions represent high sampling rates at those regions.
+					Blue regions indicate low sampling rates.
+					Notice the high sampling rates at soft shadows as opposed to surfaces that are directly hit by the light.
+					This supports the recurring conclusion that soft shadows are more demanding to render in high quality.
+				</figcaption>
+			</figure>
+</div>
+</body>
 </html>
