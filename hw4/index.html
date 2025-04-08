@@ -51,29 +51,31 @@
 		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
 		<h2>Part 1: Masses and springs</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+		The cloth simulation uses a mass-spring system where the cloth is discretized into a grid of point masses connected by springs.
+		The implementation creates an evenly spaced <code>num_width_points x num_height_points</code>  grid of point masses spanning the cloth's width and height.
+		For horizontal orientation, point masses vary in the xz-plane with a fixed y-coordinate of 1.0, while vertical orientation varies in the xy-plane with a small random z-offset for stability.
+		Three types of springs connect these masses: structural springs link adjacent masses horizontally and vertically, shearing springs connect diagonal neighbors, and bending springs span two masses apart in both directions. 
+		
+
+		<br>
+
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="task1_all_constraints.png" width="400px"/>
+				  <figcaption>All constraints</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="task1_no_shearing.png" width="400px"/>
+				  <figcaption>No shearing constraints</figcaption>
 				</td>
 			  </tr>
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="task1_shearing_constraints.png" width="400px"/>
+				  <figcaption>Only shearing constraints</figcaption>
 				</td>
 			  </tr>
 			</table>
