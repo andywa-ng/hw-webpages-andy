@@ -134,7 +134,96 @@
 		</figure>
 
 		<h2>Part 3: Handling collisions with other objects</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+		<h3>Sphere Collisions</h3>
+		
+		<h4>1. Collision Detection:</h4>
+		<ul>
+			<li>Calculate vector from sphere's origin to point mass</li>
+			<li>Compare squared distance to sphere's squared radius</li>
+			<li>If distance is less than or equal to radius, collision has occurred</li>
+		</ul>
+
+		<h4>2. Collision Response:</h4>
+		<ul>
+			<li>Normalize the direction vector to get unit vector from sphere center to point mass</li>
+			<li>Calculate tangent point on sphere surface: origin + direction * radius</li>
+			<li>Compute correction vector from last_position to tangent point</li>
+			<li>Apply correction scaled by (1-friction) to maintain energy loss due to friction</li>
+		</ul>
+
+		<h3>Plane Collisions</h3>
+		<h4>1. Crossing Detection:</h4>
+		<ul>
+			<li>Calculate signed distances from plane to both current and last positions</li>
+			<li>If signs differ (product is negative), point mass has crossed plane</li>
+		</ul>
+
+		<h4>2. Collision Response:</h4>
+		<ul>
+			<li>Calculate intersection point using ray-plane intersection</li>
+			<li>Add small offset in normal direction to prevent numerical issues</li>
+			<li>Apply friction-scaled correction to move point mass back</li>
+		</ul>
+
+		<h3>Spring Constant (ks) Analysis</h3>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="task3_lowks.png" width="400px"/>
+				  <figcaption>Cloth resting on sphere with ks=500</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="task3_regks.png" width="400px"/>
+				  <figcaption>Cloth resting on sphere with ks=5000</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="task3_highks.png" width="400px"/>
+				  <figcaption>Cloth resting on sphere with ks=50000</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		<h4>Analysis of Different ks Values:</h4>
+		<dl>
+			<dt><strong>ks = 500 (Low):</strong></dt>
+			<dd>
+				<ul>
+					<li>Cloth appears very stretchy</li>
+					<li>Significant deformation around sphere</li>
+					<li>Less accurate representation of fabric behavior</li>
+				</ul>
+			</dd>
+
+			<dt><strong>ks = 5000 (Default):</strong></dt>
+			<dd>
+				<ul>
+					<li>Balanced behavior between rigidity and flexibility</li>
+					<li>Natural-looking draping over sphere</li>
+					<li>Realistic cloth-like behavior</li>
+				</ul>
+			</dd>
+
+			<dt><strong>ks = 50000 (High):</strong></dt>
+			<dd>
+				<ul>
+					<li>Very stiff cloth behavior</li>
+					<li>Maintains shape more rigidly</li>
+					<li>Less natural draping but better shape preservation</li>
+				</ul>
+			</dd>
+		</dl>
+
+		<figure>
+			<img src="task3_plane.png" style="width:70%"/>
+			<figcaption>Cloth resting on plane</figcaption>
+		</figure>
+
 
 		<h2>Part 4: Handling self-collisions</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
