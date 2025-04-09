@@ -43,7 +43,7 @@
 		-->
 
 		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+		In this project, I implemented a comprehensive cloth simulation and rendering system that combines physics-based animation with advanced graphics techniques. The physics component uses a mass-spring system with structural, shearing, and bending springs to simulate cloth dynamics, while incorporating collision detection through spatial hashing for efficient self-collisions and object interactions. On the graphics side, I developed a suite of shaders including Blinn-Phong lighting, texture mapping, bump mapping, displacement mapping, and environment-mapped reflections, each demonstrating different approaches to achieving realistic material appearances. Through this implementation, I gained deep insights into the interplay between physical simulation and graphics rendering, particularly how parameters like spring constants and mesh density affect both the physical behavior and visual quality of the cloth. The project highlighted the fascinating balance between computational efficiency and visual realism in computer graphics, showing how different techniques can be combined to create convincing real-time simulations that are widely used in modern games and visual effects.
 
 		<h2>Part 1: Masses and springs</h2>
 
@@ -319,21 +319,129 @@
 		</div>
 
 		<h2>Part 5: Shaders</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>(Optional) Part 6: Extra Credit - Additional cloth simulation features!</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 		
-		<h2>Additional Notes (please remove)</h2>
+		<h3>1. Shader Programs, Vertex, and Fragment Shaders</h3>
+
 		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
+			<li>A shader program is a set of instructions executed on the GPU that defines how to process and render graphics. It consists of specialized stages that work together in the graphics pipeline.</li>
+			<li><strong>Vertex Shaders:</strong> These execute first and process each vertex of a 3D model. They transform vertex positions from model space to screen space, calculate lighting vectors, and pass data (like position, normal, and texture coordinates) to the fragment shader through varying variables. Their main responsibility is geometry transformation and setup for lighting calculations.</li>
+			<li><strong>Fragment Shaders:</strong> These run after the vertex data has been rasterized into fragments (potential pixels). They determine the final color of each pixel by implementing lighting models, sampling textures, and performing other material calculations. Fragment shaders receive interpolated data from the vertex shader and output the final color for each fragment.</li>
+			<li>The shaders work together in a pipeline: vertex shaders transform geometry and prepare data, then fragment shaders use this data to determine pixel colors. This division allows efficient processing, as vertex shaders run once per vertex while fragment shaders run once per fragment/pixel.</li>
+		</ul>
+		
+		<h3>2. Blinn-Phong Shading Model</h3>
+
+		<ul>
+			<li>The Blinn-Phong model simulates how light interacts with surfaces by combining three lighting components:</li>
+			<li><strong>Ambient Component:</strong> Represents indirect light that has bounced around the environment, providing base illumination even to areas not directly lit. This is a constant term that ensures no part of the object is completely black.
+			</li>
+			<li><strong>Diffuse Component:</strong> Simulates light that penetrates the surface slightly before reflecting equally in all directions. This component depends on the angle between the surface normal and light direction (n·l), creating the basic shading that gives objects their 3D appearance.
+			</li>
+			<li><strong>Specular Component:</strong> Represents light that reflects directly off the surface, creating highlights. It depends on the angle between the normal and half-vector (the normalized sum of the view and light directions). This is raised to a power to control the size of highlights, creating the appearance of shiny surfaces.
+			</li>
+			<li>The complete model combines these components: <code>L = ka*Ia + kd*(I/r²)*max(0,n·l) + ks*(I/r²)*max(0,n·h)^p</code>
 			</li>
 		</ul>
+		
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="task5_ambient.png" width="400px"/>
+				  <figcaption>Ambient component only</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="task5_diffuse.png" width="400px"/>
+				  <figcaption>Diffuse component only</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="task5_spectral.png" width="400px"/>
+				  <figcaption>Specular component only</figcaption>
+				</td>
+				<td style="text-align: center;">
+					<img src="task5_all.png" width="400px"/>
+					<figcaption>All components</figcaption>
+				  </td>
+			  </tr>
+			</table>
 		</div>
+		
+		<h3>3. Texture Mapping</h3>
+		<p>
+			Texture mapping applies 2D images onto 3D surfaces to add detail without increasing geometry complexity. My implementation samples color data from a texture using UV coordinates that map each point on the 3D model to a corresponding point on the 2D texture.
+		</p>
+		
+		<figure>
+			<img src="task5_texture.png" style="width:70%"/>
+			<figcaption>Custom texture: Miya</figcaption>
+		</figure>
+		
+		<h3>4. Bump Mapping vs. Displacement Mapping</h3>
+
+		<ul>
+			<li>
+				<strong>Bump Mapping:</strong> This technique creates the illusion of surface detail by perturbing surface normals based on a height map, without actually changing the underlying geometry. It calculates how the normal should change based on the rate of change in the height map, creating detailed lighting effects that make surfaces appear more complex than they are.
+			</li>
+			<li>
+				<strong>Displacement Mapping:</strong> This technique goes further by actually moving vertices along their normal direction based on the height map values. This creates real geometric detail that affects the silhouette of the model and creates accurate self-shadowing.
+			</li>
+			<li><strong>Comparison:</strong></li>
+			<ul>
+				<li>Bump mapping is more efficient as it only affects lighting calculations, not geometry</li>
+				<li>Displacement mapping creates actual geometric detail visible in silhouettes and shadows</li>
+				<li>Bump mapping looks less realistic at grazing angles where the lack of geometric detail becomes apparent</li>
+				<li>Displacement mapping's effectiveness depends heavily on mesh density</li>
+			</ul>
+		</ul>
+		
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="task5_bump.png" width="400px"/>
+				  <figcaption>Bump mapping</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="task5_displace.png" width="400px"/>
+				  <figcaption>Displacement mapping</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+		
+		<p>When changing the sphere's coarseness:</p>
+		<ul>
+			<li>With low resolution (-o 16 -a 16), displacement mapping shows visible faceting as there aren't enough vertices to create smooth detail</li>
+			<li>With high resolution (-o 128 -a 128), displacement mapping creates much smoother detail that more accurately represents the height map</li>
+			<li>Bump mapping looks similar at both resolutions since it doesn't change the geometry, only the lighting calculations</li>
+		</ul>
+		
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="task5_16.png" width="400px"/>
+				  <figcaption>Low resolution (-o 16 -a 16)</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="task5_128.png" width="400px"/>
+				  <figcaption>High resolution (-o 128 -a 128)</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+		
+		<h3>5. Mirror Shader</h3>
+		<p>
+			The mirror shader simulates perfect reflection by calculating the reflection of the view vector across the surface normal and using this reflected direction to sample an environment cubemap. This creates the illusion that the object is reflecting its surroundings.
+		</p>
+
+		<figure>
+			<img src="task5_mirror.png" style="width:70%"/>
+			<figcaption>Mirror shader</figcaption>
+		</figure>
+		
 	</body>
 </html>
