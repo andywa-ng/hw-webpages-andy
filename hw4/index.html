@@ -47,7 +47,7 @@
 
 		<h2>Part 1: Masses and springs</h2>
 
-		<h3>Implementing a grid of masses and springs</h3>
+		<h3>Cloth Implementation</h3>
 		<ul>
 			<li>The cloth simulation uses a mass-spring system where the cloth is discretized into a grid of point masses connected by springs.</li>
 			<li>The implementation creates an evenly spaced <code>num_width_points x num_height_points</code>  grid of point masses spanning the cloth's width and height.</li>
@@ -137,34 +137,25 @@
 
 		<h3>Sphere Collisions</h3>
 		
-		<h4>1. Collision Detection:</h4>
-		<ul>
+		<ol>
 			<li>Calculate vector from sphere's origin to point mass</li>
 			<li>Compare squared distance to sphere's squared radius</li>
 			<li>If distance is less than or equal to radius, collision has occurred</li>
-		</ul>
-
-		<h4>2. Collision Response:</h4>
-		<ul>
 			<li>Normalize the direction vector to get unit vector from sphere center to point mass</li>
 			<li>Calculate tangent point on sphere surface: origin + direction * radius</li>
 			<li>Compute correction vector from last_position to tangent point</li>
 			<li>Apply correction scaled by (1-friction) to maintain energy loss due to friction</li>
-		</ul>
+		</ol>
 
 		<h3>Plane Collisions</h3>
-		<h4>1. Crossing Detection:</h4>
-		<ul>
+
+		<ol>
 			<li>Calculate signed distances from plane to both current and last positions</li>
 			<li>If signs differ (product is negative), point mass has crossed plane</li>
-		</ul>
-
-		<h4>2. Collision Response:</h4>
-		<ul>
 			<li>Calculate intersection point using ray-plane intersection</li>
 			<li>Add small offset in normal direction to prevent numerical issues</li>
 			<li>Apply friction-scaled correction to move point mass back</li>
-		</ul>
+		</ol>
 
 		<h3>Spring Constant (ks) Analysis</h3>
 
@@ -189,7 +180,6 @@
 			</table>
 		</div>
 
-		<h4>Analysis of Different ks Values:</h4>
 		<dl>
 			<dt><strong>ks = 500 (Low):</strong></dt>
 			<dd>
@@ -226,7 +216,107 @@
 
 
 		<h2>Part 4: Handling self-collisions</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+		<h3>1. Spatial Hashing</h3>
+		<ul>
+			<li>A function <code>hash_position</code> maps a 3D point mass position <code>pos</code> to a unique <code>float</code> key.</li>
+			<li>This key represents a specific 3D box volume in the simulation space.</li>
+			<li>The space is partitioned into a grid of 3D boxes with dimensions <code>w = 3 * width / num_width_points</code>, <code>h = 3 * height / num_height_points</code>, and <code>t = max(w, h)</code>.</li>
+			<li>The function calculates the integer grid indices <code>(x_box, y_box, z_box)</code> corresponding to <code>pos</code> by dividing the coordinates by the box dimensions and taking the floor (<code>floor(pos.x / w)</code>, etc.).</li>
+			<li>These indices are combined into a unique float key (e.g., <code>x_box + y_box * 1000.0f + z_box * 1000000.0f</code>).</li>
+		</ul>
+
+		<h3>2. Building the Spatial Map</h3>
+		<ul>
+			<li>At the beginning of each simulation step (specifically, before collision checks), the <code>build_spatial_map</code> function is called.</li>
+			<li>It first clears the existing hash map (<code>map</code>), which stores <code>float</code> keys mapped to <code>vector&lt;PointMass *&gt;</code> lists.</li>
+			<li>It then iterates through all point masses in the cloth.</li>
+			<li>For each point mass, it computes its hash key using <code>hash_position</code>.</li>
+			<li>It adds a pointer to the point mass into the vector associated with that key in the <code>map</code>. If the key doesn't exist, a new vector is created.</li>
+		</ul>
+
+		<h3>3. Self-Collision Check</h3>
+		<ul>
+			<li>For each point mass <code>pm</code>, the <code>self_collide</code> function is called.</li>
+			<li>It retrieves the hash key for <code>pm</code>'s position.</li>
+			<li>It looks up the corresponding vector of potential collision candidates (other point masses in the same 3D box) from the <code>map</code>.</li>
+			<li>It iterates through these candidates:
+				<ul>
+					<li>It skips checking collision with the point mass itself (<code>&amp;pm == candidate</code>).</li>
+					<li>It calculates the distance between <code>pm</code> and the candidate.</li>
+					<li>If the distance is less than the threshold <code>2 * thickness</code>, a collision is detected.</li>
+					<li>A correction vector is calculated to push <code>pm</code> away from the candidate, aiming for a separation distance of exactly <code>2 * thickness</code>. The vector points from the candidate to <code>pm</code>.</li>
+					<li>This correction vector is added to a <code>total_correction</code> accumulator, and a <code>correction_count</code> is incremented.</li>
+				</ul>
+			</li>
+			<li>After checking all candidates in the bin, if <code>correction_count &gt; 0</code>, the average correction (<code>total_correction / correction_count</code>) is computed.</li>
+			<li>This average correction is scaled down by <code>simulation_steps</code> (to prevent excessive movement in one step) and added to <code>pm</code>'s position.</li>
+		</ul>
+
+		<h3>Self-Collision Behavior Documentation</h3>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="task4_1.png" width="400px"/>
+				  <figcaption>Initial self-collision as the cloth begins to fold</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="task4_2.png" width="400px"/>
+				  <figcaption>Cloth folding further onto itself, demonstrating self-collision handling preventing intersection</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="task4_3.png" width="400px"/>
+				  <figcaption>Cloth settled on the plane, showing the final folded configuration maintained by self-collision forces</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		<h3>Density</h3>
+		<ul>
+			<li><strong>Low Density</strong>: The cloth is lighter and falls more slowly, potentially leading to gentler folds and less pronounced self-collision effects initially. It might flutter or ripple more before settling.</li>
+			<li><strong>High Density</strong>: The cloth is heavier, falls faster, and collapses more dramatically. This can lead to more forceful self-collisions and potentially deeper, more compact folds when resting.</li>
+		</ul>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="task4_lowdensity.png" width="400px"/>
+				  <figcaption>Low density</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="task4_highdensity.png" width="400px"/>
+				  <figcaption>High density</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		<h3>Spring Constant (ks)</h3>
+		<ul>
+			<li><strong>Low ks</strong>: The cloth is very stretchy. During self-collision, it might deform significantly upon contact before the repulsive force pushes points apart. Folds might appear softer and less defined. The overall shape might be less preserved as it collapses.</li>
+			<li><strong>High ks</strong>: The cloth is stiffer. It resists deformation more upon self-contact. Folds will appear sharper and more defined. The cloth structure is better maintained during the collapse, leading to potentially less compact folding compared to low <code>ks</code>.</li>
+		</ul>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="task4_lowks.png" width="400px"/>
+				  <figcaption>Low ks</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="task4_highks.png" width="400px"/>
+				  <figcaption>High density</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 
 		<h2>Part 5: Shaders</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
